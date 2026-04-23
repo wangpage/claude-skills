@@ -1,0 +1,228 @@
+# AI Radar — source manifest
+#
+# Each source has:
+#   id:            stable identifier, used in logs/archives
+#   name:          human-readable
+#   url:           primary first-hand URL
+#   fallback_url:  optional; used if the primary returns stale/redirect content
+#   type:          blog | rss | arxiv | github | huggingface | x | openreview
+#   tags:          at least one of [lab, person, academic, oss]
+#                  extra topic tags optional (e.g. agent, vision, safety)
+#   weight:        institution weight, 0.0–1.0, feeds the scoring formula
+#   enabled:       set false to mute a source without deleting it
+#   notes:         quirks, known 403/403, what to look for
+#
+# Convention: keep this file short. The whole point is ~10 minutes of review
+# twice a week. If it grows past ~25 enabled sources, prune before adding.
+
+version: 1
+
+push:
+  # Default destination for P7 push. Override per-run by asking.
+  # When null, the workflow sends to the authenticated user's self DM.
+  destination: null   # examples: "oc_xxxxxxxxxxxx" (group chat), or "doccn_..." (wiki doc)
+  format: markdown     # markdown | text
+
+sources:
+
+  # --- Labs & companies (official first-hand) ---
+
+  - id: openai_blog
+    name: OpenAI News
+    url: https://openai.com/news/
+    fallback_url: https://openai.com/blog/
+    type: blog
+    tags: [lab]
+    weight: 1.0
+    enabled: true
+    notes: WebFetch frequently returns 403; try fallback or fall back to recent items via search.
+
+  - id: deepmind_blog
+    name: Google DeepMind
+    url: https://deepmind.google/discover/blog/
+    fallback_url: https://deepmind.google/research/publications/
+    type: blog
+    tags: [lab]
+    weight: 1.0
+    enabled: true
+    notes: Occasional intermediate redirect; prefer research-index URL on miss.
+
+  - id: anthropic_news
+    name: Anthropic News
+    url: https://www.anthropic.com/news
+    fallback_url: https://www.anthropic.com/research
+    type: blog
+    tags: [lab]
+    weight: 1.0
+    enabled: true
+    notes: Landing page hides dates in some fetches; open individual items to confirm.
+
+  - id: meta_ai_blog
+    name: Meta AI (FAIR)
+    url: https://ai.meta.com/blog/
+    fallback_url: https://ai.meta.com/research/
+    type: blog
+    tags: [lab, oss]
+    weight: 0.9
+    enabled: true
+
+  - id: nvidia_dev
+    name: NVIDIA Developer Blog
+    url: https://developer.nvidia.com/blog
+    type: blog
+    tags: [lab]
+    weight: 0.8
+    enabled: true
+    notes: Good for inference / compute / ecosystem signals.
+
+  - id: microsoft_azure_ai
+    name: Microsoft Azure AI
+    url: https://techcommunity.microsoft.com/category/azure-ai
+    type: blog
+    tags: [lab]
+    weight: 0.6
+    enabled: false
+    notes: High volume, low novelty — off by default.
+
+  - id: apple_ml
+    name: Apple Machine Learning Research
+    url: https://machinelearning.apple.com/
+    type: blog
+    tags: [lab]
+    weight: 0.7
+    enabled: true
+
+  # --- Chinese AI labs ---
+
+  - id: deepseek
+    name: DeepSeek
+    url: https://www.deepseek.com/blog
+    type: blog
+    tags: [lab]
+    weight: 0.9
+    enabled: true
+
+  - id: qwen
+    name: Qwen (Alibaba)
+    url: https://qwen.ai/
+    type: blog
+    tags: [lab, oss]
+    weight: 0.8
+    enabled: true
+
+  - id: moonshot_kimi
+    name: Moonshot (Kimi)
+    url: https://kimi.moonshot.cn/
+    type: blog
+    tags: [lab]
+    weight: 0.7
+    enabled: true
+
+  # --- People signals ---
+
+  - id: karpathy
+    name: Andrej Karpathy
+    url: https://x.com/karpathy
+    fallback_url: https://karpathy.ai/
+    type: x
+    tags: [person, engineering]
+    weight: 0.9
+    enabled: true
+    notes: Highest signal-to-noise in the engineering bucket.
+
+  - id: ylecun
+    name: Yann LeCun
+    url: https://x.com/ylecun
+    type: x
+    tags: [person, research]
+    weight: 0.7
+    enabled: true
+    notes: Useful as consensus counter-weight.
+
+  - id: sama
+    name: Sam Altman
+    url: https://x.com/sama
+    type: x
+    tags: [person, strategy]
+    weight: 0.7
+    enabled: true
+    notes: Watch for product/pacing signals; treat forward-looking claims as intent, not spec.
+
+  - id: demishassabis
+    name: Demis Hassabis
+    url: https://x.com/demishassabis
+    type: x
+    tags: [person, research]
+    weight: 0.8
+    enabled: true
+
+  - id: andrewyng
+    name: Andrew Ng (The Batch)
+    url: https://www.deeplearning.ai/the-batch/
+    type: blog
+    tags: [person, engineering]
+    weight: 0.6
+    enabled: true
+
+  # --- Academic ---
+
+  - id: arxiv_cs_ai
+    name: arXiv cs.AI recent
+    url: https://arxiv.org/list/cs.AI/recent
+    type: arxiv
+    tags: [academic]
+    weight: 0.8
+    enabled: true
+    notes: Requires keyword filter at runtime; never scan without keywords.
+
+  - id: arxiv_cs_cl
+    name: arXiv cs.CL recent
+    url: https://arxiv.org/list/cs.CL/recent
+    type: arxiv
+    tags: [academic]
+    weight: 0.8
+    enabled: true
+
+  - id: arxiv_cs_lg
+    name: arXiv cs.LG recent
+    url: https://arxiv.org/list/cs.LG/recent
+    type: arxiv
+    tags: [academic]
+    weight: 0.7
+    enabled: true
+
+  - id: openreview
+    name: OpenReview
+    url: https://openreview.net/
+    type: openreview
+    tags: [academic]
+    weight: 0.6
+    enabled: true
+    notes: Only load when a paper is contested.
+
+  - id: paperswithcode
+    name: Papers with Code (SOTA)
+    url: https://paperswithcode.com/sota
+    type: blog
+    tags: [academic]
+    weight: 0.6
+    enabled: true
+
+  # --- Open source ---
+
+  - id: hf_trending
+    name: Hugging Face trending
+    url: https://huggingface.co/models?sort=trending
+    type: huggingface
+    tags: [oss]
+    weight: 0.7
+    enabled: true
+
+  - id: github_trending_py
+    name: GitHub trending (Python, week)
+    url: https://github.com/trending/python?since=weekly
+    type: github
+    tags: [oss]
+    weight: 0.5
+    enabled: true
+    notes: High noise; filter aggressively — most trending repos are not signals.

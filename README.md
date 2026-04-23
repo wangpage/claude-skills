@@ -24,7 +24,7 @@ Claude Code skills are directory-based. To install a skill:
 
 | Skill | Purpose |
 |---|---|
-| [`ai-pulse`](skills/Geek-skills-ai-pulse/) | Low-noise sweep of the AI frontier on a sustainable cadence. Produces a three-field (`change / data / limits`) digest — no hype, no "key takeaways" section. Sub-commands: `+scan`, `+labs`, `+people`, `+arxiv`, `+oss`, `+extract`, `+diff`. |
+| [`ai-radar`](skills/Geek-skills-ai-radar/) | **Auto-pipeline** that sweeps the AI frontier and pushes a structured digest to Feishu. Four stages: collect (from `sources.yaml`) → filter (drop hype) → extract (five-field prompt: `what / innovation / data / limits / worth-watching`) → output + push. Scores each item H/M/L and tracks tag trends across runs. Sub-commands: `+scan`, `+labs`, `+people`, `+arxiv`, `+oss`, `+extract`, `+trend`, `+diff`, `+push`. |
 
 ### Layout
 
@@ -75,7 +75,7 @@ Claude Code 的 skill 是基于目录的。安装步骤：
 
 | Skill | 用途 |
 |---|---|
-| [`ai-pulse`](skills/Geek-skills-ai-pulse/) | 按可持续节奏（建议每周两次，每次 10 分钟）扫一遍 AI 前沿。只产出「变化 / 数据 / 限制」三字段的紧凑 digest——不吹捧、不堆砌"关键要点"。子命令：`+scan`、`+labs`、`+people`、`+arxiv`、`+oss`、`+extract`、`+diff`。 |
+| [`ai-radar`](skills/Geek-skills-ai-radar/) | **自动管线**：采集（读 `sources.yaml`）→ 过滤（去噪/去 hype）→ 提取（五字段 prompt：`what / innovation / data / limits / worth-watching`）→ 输出并推送飞书。每条打分 H/M/L，并跨运行追踪标签趋势。不产出「关键要点」式总结。子命令：`+scan`、`+labs`、`+people`、`+arxiv`、`+oss`、`+extract`、`+trend`、`+diff`、`+push`。 |
 
 ### 目录结构
 

@@ -24,7 +24,7 @@ Claude Code skills are directory-based. To install a skill:
 
 | Skill | Purpose |
 |---|---|
-| [`ai-radar`](skills/Geek-skills-ai-radar/) | **Auto-pipeline** that sweeps the AI frontier and pushes a structured digest to Feishu. Four stages: collect (from `sources.yaml`) → filter (drop hype) → extract (five-field prompt: `what / innovation / data / limits / worth-watching`) → output + push. Scores each item H/M/L and tracks tag trends across runs. Sub-commands: `+scan`, `+labs`, `+people`, `+arxiv`, `+oss`, `+extract`, `+trend`, `+diff`, `+push`. |
+| [`ai-radar`](skills/Geek-skills-ai-radar/) | **AI frontier radar / AI information-diet.** A curated "AI bookmark folder" (top researchers + official labs + arXiv / Papers with Code + GitHub / Hugging Face) swept on a sustainable cadence (twice a week, ~10 min each) and delivered to Feishu as a structured digest. Four-stage pipeline: **collect** (from `sources.yaml`) → **filter** (drop hype / secondhand takes) → **extract** (five-field prompt: `what / innovation / data / limits / worth-watching`) → **output + push**. Framed as a *cognitive filter*, not a news aggregator: no "key takeaways", no editorializing — only verifiable facts, honest H/M/L scoring, and cross-run tag trends (`agent ↑, reasoning ↑, multimodal ↓`). Sub-commands: `+scan`, `+labs`, `+people`, `+arxiv`, `+oss`, `+extract`, `+trend`, `+diff`, `+push`. |
 
 ### Layout
 
@@ -75,7 +75,7 @@ Claude Code 的 skill 是基于目录的。安装步骤：
 
 | Skill | 用途 |
 |---|---|
-| [`ai-radar`](skills/Geek-skills-ai-radar/) | **自动管线**：采集（读 `sources.yaml`）→ 过滤（去噪/去 hype）→ 提取（五字段 prompt：`what / innovation / data / limits / worth-watching`）→ 输出并推送飞书。每条打分 H/M/L，并跨运行追踪标签趋势。不产出「关键要点」式总结。子命令：`+scan`、`+labs`、`+people`、`+arxiv`、`+oss`、`+extract`、`+trend`、`+diff`、`+push`。 |
+| [`ai-radar`](skills/Geek-skills-ai-radar/) | **AI 前沿雷达 / AI 信息源。** 把一份"AI 收藏夹"（大佬信号 + 官方实验室 + arXiv / Papers with Code + GitHub / Hugging Face）按可持续节奏（每周 2 次、每次 ~10 分钟）自动扫一遍，以结构化 digest 推送到飞书。四段管线：**采集**（读 `sources.yaml`）→ **过滤**（去 hype / 去转述）→ **提取**（五字段 prompt：`what / innovation / data / limits / worth-watching`）→ **输出并推送**。定位是"**认知过滤器**"而不是"信息聚合器"：不写「关键要点」、不做观点评论，只提取可验证事实，并跨运行追踪标签趋势（`agent ↑、reasoning ↑、multimodal ↓`）。子命令：`+scan`、`+labs`、`+people`、`+arxiv`、`+oss`、`+extract`、`+trend`、`+diff`、`+push`。 |
 
 ### 目录结构
 

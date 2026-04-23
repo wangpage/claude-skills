@@ -2,18 +2,19 @@
 name: ai-radar
 version: 0.2.1
 description: >
-  Auto-pipeline that sweeps the AI frontier and pushes a structured digest to
-  Feishu / Lark. Four stages: collect (from sources.yaml) → filter (drop
-  hype) → extract (five-field prompt) → output + push. Designed to run on a
-  sustainable cadence (twice a week, ~10 min review each) and to produce a
-  digest that the user *actually reads* — no hype, no "key takeaways". Scores
-  each item H/M/L and tracks tag trends across runs so the user sees not just
-  "what's new" but "what's rising / falling". Chinese trigger examples:
-  "AI 前沿扫一遍", "跑一下 AI Radar", "最新 AI 消息", "这周有什么新模型",
-  "推一份 AI 周报到飞书", "大佬动态", "arXiv 新论文", "AI 信息源". Do NOT
-  use for one-off factual questions about a single model (do a normal
-  search), for deep literature reviews (use deep-research), or for generating
-  marketing-style hype summaries.
+  AI 前沿雷达 / AI 信息源。把一份"AI 收藏夹"（大佬信号 + 官方实验室 + arXiv /
+  Papers with Code + GitHub / Hugging Face）按可持续节奏（每周 2 次、每次
+  ~10 分钟）自动扫一遍，以结构化 digest 推送到飞书。四段管线：**采集**（读
+  sources.yaml）→ **过滤**（去 hype、去转述）→ **提取**（五字段 prompt：
+  what / innovation / data / limits / worth-watching）→ **输出并推送**。
+  本质是"**认知过滤器**"而不是"信息聚合器"：不写"关键要点"、不做观点评论，
+  只提取可验证事实，并跨运行追踪标签趋势（agent ↑ / reasoning ↑ /
+  multimodal ↓）。Chinese trigger examples: "AI 前沿扫一遍", "跑一下 AI
+  Radar", "最新 AI 消息", "这周有什么新模型", "推一份 AI 周报到飞书",
+  "大佬动态", "arXiv 新论文", "AI 信息源". Do NOT use for one-off factual
+  questions about a single model (do a normal search), for deep literature
+  reviews (use deep-research), or for generating marketing-style hype
+  summaries.
 compatibility: >
   Requires WebFetch and WebSearch. Feishu push requires `lark-cli` with user
   identity and the `im:message` + `im:message.send_as_user` scopes. File I/O
@@ -47,7 +48,12 @@ metadata:
 
 ## English
 
-A disciplined **pipeline** for keeping up with AI without drowning in it.
+Think of this as a **self-sweeping AI bookmark folder** — not a news
+aggregator, but a **cognitive filter**. You maintain the "folder"
+(`sources.yaml`: ~10 entries across top researchers, official labs,
+arXiv / Papers with Code, GitHub / Hugging Face). Twice a week, the skill
+sweeps it and returns only items that pass five-field extraction and honest
+H/M/L scoring, pushed to Feishu so you actually read it.
 
 The mental model is not "a thing that lists news" — it is:
 
@@ -92,6 +98,11 @@ per [extraction-template.md](references/extraction-template.md):
 ```
 # AI Radar — <date> — <scope>
 
+## Start here         ← up to 3 H items, each with one-line "why click first" (omit if no H)
+- Claude Opus 4.7 — Anthropic's flagship version bump; matters for any tool-use / agent work this quarter.
+- RAG-Anything (arXiv:xxxx) — highest-upvoted paper on HF this week; unified cross-modal retrieval.
+- Kimi K2.6 — 1.1T-param open release, largest open model updated this cycle.
+
 ## Labs & companies
 - [H] <source>: <what> | <innovation> | <data> | <limits>
 
@@ -111,7 +122,8 @@ per [extraction-template.md](references/extraction-template.md):
 - <source>: no update since <date>
 ```
 
-No executive summary. No "key takeaways". Empty sections are omitted.
+No "key takeaways" paragraph. The only lead-in allowed is `## Start here`,
+and only when H items exist. Empty sections are omitted.
 
 ### Active context bundle
 
@@ -165,10 +177,12 @@ Scope hints compose: `+scan since:2026-04-15`, `+arxiv keywords:"reasoning"`,
 Resolve: which sub-command, since when (default 7 days), what exclusions.
 State it back in one line, then proceed.
 
-#### P1 — Collect
+#### P1 — Collect (discovery only)
 
 Read `sources.yaml`. For each source whose `enabled: true` and whose tags
-match the scope, fetch. Parallelize independent fetches. Rules:
+match the scope, fetch **the landing / feed page only**. Goal: produce a
+list of candidate items `(title, URL, date)`. No field-filling here — that
+happens in P3 after filtering. Parallelize independent fetches. Rules:
 
 - First-hand URL only. No aggregators.
 - Respect known network constraints (e.g., `eastmoney.*` blocked on this
@@ -189,9 +203,23 @@ Apply [triage-heuristics.md](references/triage-heuristics.md):
 - An honest thin week beats a padded fat one. If filter drops everything,
   say so.
 
-#### P3 — Extract
+#### P3 — Drill-down and Extract
 
-For each surviving item, fill five fields per
+For each candidate that survived P2, **first fetch the item's own URL**
+(the specific post, model card, paper abstract — not the landing page).
+The landing page gave you the headline; the detail page is where
+benchmarks, licenses, and stated limits actually live.
+
+Drill-down rules:
+- Parallelize detail-page fetches. Target 5–10 items per run — more than
+  that and the run stops finishing in 10 minutes.
+- If a detail-page fetch fails, record it under `## Unreachable` and fall
+  back to whatever the landing page showed (fields will likely end up as
+  `not disclosed`).
+- For OSS items, the detail page is the model card / release page, not
+  the repo README. For papers, it's the arXiv abstract, not a summarizer.
+
+Then fill five fields per
 [extraction-template.md](references/extraction-template.md):
 
 1. `what` — what this is (model / paper / product / post) in one sentence.
@@ -200,7 +228,8 @@ For each surviving item, fill five fields per
 3. `data` — benchmark name + score, or `not disclosed`. Never invent.
 4. `limits` — what the source itself admits, or `none disclosed`.
 5. `worth-watching` — `H` / `M` / `L` per scoring rubric. Default is `M`;
-   `H` requires justification.
+   `H` is either score ≥ 2.0 or auto-promoted (top-lab named version
+   release, etc.) per scoring-and-trends.md.
 
 #### P4 — Score & tag
 
@@ -267,8 +296,11 @@ Do not archive silently.
   sweep arXiv.
 - **Never push to a Feishu destination the user hasn't confirmed at least
   once.** Self DM is the safe default.
-- **Never generate an "executive summary" section.** The rows are the
-  summary.
+- **Never generate a "key takeaways" paragraph or editorial summary.**
+  The only allowed lead-in is `## Start here`, and it must: list at most
+  3 items, reference only `H` items already in the body, and give a
+  factual one-line "why click first" (no hype, no vibes). If the run has
+  zero H items, omit Start here entirely.
 
 ### Evolving the skill
 
@@ -282,7 +314,11 @@ Do not archive silently.
 
 ## 中文
 
-一条有纪律的**管线**，帮你跟上 AI 又不被信息量淹没。
+把它想成一份**自我扫描的 AI 收藏夹**——不是新闻聚合器，而是一个**认知过滤
+器**。你维护这份"收藏夹"（`sources.yaml`：大佬信号 + 官方实验室 + arXiv /
+Papers with Code + GitHub / Hugging Face，入口控制在 10 个以内）。每周 2 次
+扫一遍，只返回通过五字段提取与诚实 H/M/L 打分的条目，推送到飞书，保证你真
+的会去看。
 
 心智模型不是「一个罗列新闻的东西」，而是：
 
@@ -321,6 +357,11 @@ Do not archive silently.
 ```
 # AI Radar — <日期> — <范围>
 
+## 本周先看         ← 最多 3 条 H 项，每条一行「为什么先点」（没有 H 就整段省略）
+- Claude Opus 4.7 — Anthropic 旗舰版本升级；本季度做 tool-use / agent 工作必看。
+- RAG-Anything (arXiv:xxxx) — 本周 HF 论文榜最高票；统一跨模态检索框架。
+- Kimi K2.6 — 1.1T 参数开源，本周期最大的开放模型更新。
+
 ## Labs & companies
 - [H] <来源>: <what> | <innovation> | <data> | <limits>
 
@@ -340,7 +381,8 @@ Do not archive silently.
 - <来源>: no update since <日期>
 ```
 
-没有 executive summary，没有「关键要点」。空段落直接省略。
+不写「关键要点」段。唯一允许的开场白是 `## 本周先看`，且只有在有 H 条目时
+才出现。空段落直接省略。
 
 ### 激活时加载
 
@@ -392,10 +434,11 @@ Do not archive silently.
 明确三件事：用哪个子命令？起点时间（默认最近 7 天）？排除什么？用一句话把
 结果复述给用户，然后进入下一步。
 
-#### P1 — 采集（Collect）
+#### P1 — 采集（Collect，仅做发现）
 
-读 `sources.yaml`。对所有 `enabled: true` 且 tags 匹配当前范围的源执行抓取，
-独立请求并行化。规则：
+读 `sources.yaml`。对所有 `enabled: true` 且 tags 匹配当前范围的源，**只抓
+landing / feed 页**。目标是产出候选清单 `(标题, URL, 日期)`，**不在这一步
+填字段**——填字段留给 P3。独立请求并行化。规则：
 
 - 只走一手 URL，不走聚合站。
 - 尊重已知网络限制（例如 `eastmoney.*` 在本网络被整体封锁——和 AI 无关，但是
@@ -414,16 +457,28 @@ Do not archive silently.
   物、转述他人帖子的"汇总"帖。
 - 一个诚实的淡周胜过一个注水的丰周。若过滤后清空，就如实说。
 
-#### P3 — 提取（Extract）
+#### P3 — 点进详情 + 提取（Drill-down + Extract）
 
-对通过过滤的每条目按 [extraction-template.md](references/extraction-template.md)
-填五个字段：
+对通过 P2 的每个候选，**先抓该条目自己的 URL**（具体的那篇博文、model
+card、arXiv 摘要——不是 landing 页）。landing 页给你的是标题，benchmark /
+license / 源头自述的限制都在详情页里。
+
+Drill-down 规则：
+- 详情页抓取并行化。目标 5–10 条 / 次，多了跑不完 10 分钟预算。
+- 若某条详情页抓取失败，记入 `## Unreachable`，退回到 landing 页已有信息
+  （字段大概率变成 `not disclosed`）。
+- OSS 条目的详情页是 model card / release 页，不是 repo README。论文条目是
+  arXiv 摘要，不是转述文。
+
+然后按 [extraction-template.md](references/extraction-template.md) 填五个字段：
 
 1. `what`——这是什么（模型 / 论文 / 产品 / 帖子），一句话。
 2. `innovation`——1–3 条"新在哪"。每条一小段，不带影响力形容词。
 3. `data`——benchmark 名称 + 分数，或 `not disclosed`。**永不编造数字**。
 4. `limits`——源头自己承认的边界，或 `none disclosed`。
-5. `worth-watching`——`H` / `M` / `L`，按打分表。默认 `M`；`H` 必须有依据。
+5. `worth-watching`——`H` / `M` / `L`，按打分表。`H` 要么 score ≥ 2.0，
+   要么触发自动升级规则（顶级实验室具名版本发布等，详见
+   `scoring-and-trends.md`）。
 
 #### P4 — 打分与打标签（Score & tag）
 
@@ -481,7 +536,10 @@ lark-cli im +messages-send --as user --user-id <self-open-id> \
 - **永不把产品推荐为"最好"。**本 skill 只报告，不背书。
 - **永不自作主张扩大范围。**`+labs` 不会悄悄去扫 arXiv。
 - **永不推送到用户从未确认过的飞书目的地。**默认自己 DM 是最安全的回退。
-- **永不生成「执行摘要」段。**行本身就是摘要。
+- **永不生成「关键要点」或议论式摘要段。**唯一允许的开场白是
+  `## 本周先看`，且必须：最多 3 条、只指向已经在正文出现的 H 条目、每条一句
+  事实性的「为什么先点」（不带 hype，不带"感觉很重要"）。本次运行没有 H
+  就**整段省略**。
 
 ### 演进这个 skill
 

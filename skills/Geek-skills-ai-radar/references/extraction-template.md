@@ -19,6 +19,36 @@ fields are what let the user skim the digest without clicking every link.
 If you cannot fill `what` in one sentence, the item is probably not worth
 including.
 
+## Start here (reading-order block)
+
+The digest opens with a short pointer section called `## Start here` /
+`## 本周先看`. This is the ONE exception to the "no executive summary"
+rule — and it is narrow on purpose:
+
+- **At most 3 items.** Always. If 5 items qualify, pick the 3 with highest
+  reader-action value (reader bias: frontier model release > major paper
+  > new tool > infrastructure).
+- **Only items already in the body at `[H]`.** If the run has zero H
+  items, **omit the Start here section entirely**. Do not pad with M's.
+- **One line per item.** Format: `- <name> — <one-line why to click
+  first>`. The "why" must be factual (a specific capability, a specific
+  number, a specific actor) — not hype ("groundbreaking") or vibes
+  ("seems important").
+- **No ranking within Start here.** The three lines are peers, not a
+  top-3 list. Order by section-of-origin (Labs, Papers, OSS).
+
+Row shape:
+
+```
+## Start here
+- Claude Opus 4.7 — Anthropic's flagship version bump; the "agents + multi-step" focus matters for any tool-use work this quarter.
+- RAG-Anything (arXiv:2510.12323) — unified cross-modal retrieval framework, highest-upvoted paper on HF this week.
+- Kimi K2.6 — 1.1T-param open release from Moonshot; largest open model updated this cycle.
+```
+
+If there is no H item, do not emit the header — go straight to
+`## Labs & companies`.
+
 ## Row shapes by section
 
 Rows are one-line-per-item *when possible*, with the five fields separated
@@ -115,9 +145,12 @@ picture is incomplete.
 
 ## Hard rules
 
-1. **No "key takeaways" section.** The rows are the takeaways.
-2. **No editorial ranking beyond `worth-watching`.** Do not add
-   "must read" / "most important" markers. The H/M/L is the ranking signal.
+1. **No "key takeaways" paragraph.** The only allowed lead-in is the
+   `## Start here` block, and it must follow all the constraints above
+   (≤3 items, H-only, one line each, factual why).
+2. **No editorial ranking within sections.** Inside `## Labs & companies`
+   etc., items are not ordered by importance. The H/M/L marker is the
+   ranking; `## Start here` is the pointer.
 3. **No adjectives of impact.** Forbidden: "groundbreaking", "massive",
    "huge", "game-changing", "state-of-the-art" (unless the source itself
    uses the phrase and you are quoting it).
@@ -126,8 +159,9 @@ picture is incomplete.
    40%".
 5. **Empty sections are omitted.** Do not write "No new releases this week"
    as a section body. Just leave the section out.
-6. **`H` is rare.** If more than ~20% of items in a run are marked `H`, the
-   scoring is miscalibrated — recheck before pushing.
+6. **`H` is rare but not absent.** Expect 1–3 H items per run in an active
+   week; expect 0 in a quiet week. More than ~20% of items marked H means
+   drift — recheck before pushing.
 
 ## Worth-watching buckets (short version; full rubric in scoring-and-trends.md)
 

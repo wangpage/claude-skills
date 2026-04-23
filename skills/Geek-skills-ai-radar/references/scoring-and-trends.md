@@ -30,14 +30,16 @@ Qualitative. Use this rubric, not a vibe:
 | Value | Criteria |
 |---:|---|
 | 1.0 | New paradigm (a capability class that did not exist) OR benchmark SOTA verified by an independent eval. |
-| 0.7 | Meaningful benchmark improvement WITH the benchmark name disclosed AND a modern baseline cited. |
-| 0.5 | New model or feature release with credible scope but no independent verification yet. |
+| 0.7 | Meaningful benchmark improvement WITH the benchmark name disclosed AND a modern baseline cited — **OR** a named-version release from a top-lab source (`institution_weight ≥ 0.9`), e.g. "Claude Opus X.Y", "GPT-X", "Gemini X". |
+| 0.5 | New model or feature release from a non-top-lab source, or a top-lab release that is clearly scoped (pricing, region, SKU) rather than a version bump. |
 | 0.3 | Incremental improvement, pricing change, API addition, doc update. |
 | 0.1 | Marketing post with no technical substance. |
 | 0.0 | No technical content. |
 
-**Default to 0.3 when uncertain.** If the source itself does not disclose a
-benchmark name, the score cannot exceed 0.5.
+**Default to 0.3 when uncertain.** The v0.2 rule that capped score at 0.5
+without a disclosed benchmark name has been **removed** — reality is that
+top labs often ship first and publish the eval card days later, and those
+version bumps ARE the signal the reader most wants.
 
 ### community_heat (0.0 – 1.0)
 
@@ -62,6 +64,27 @@ sufficient in most cases.
 | ≥ 2.0 | `H` |
 | 1.0 – 1.99 | `M` |
 | < 1.0 | `L` |
+
+## Automatic H promotion (overrides the bucket)
+
+Some items are signals even when their raw score rounds to M. Promote to
+`H` when **any one** of these holds:
+
+1. **Named version release from a top lab** — an item like "Claude Opus
+   4.7", "GPT-5.2", "Gemini 3 Pro Preview", "DeepSeek V3.2", "Kimi K2
+   Thinking" from a source with `institution_weight ≥ 0.9`. These are what
+   the reader actually wants to know about on day one.
+2. **Paper with a named, common benchmark + modern baseline** — the eval
+   section must cite a recognized benchmark (MMLU, HumanEval, SWE-bench,
+   GPQA, MATH, BigBench, …) with a score number AND a comparison against a
+   current top-tier model. Community upvotes alone do not qualify.
+3. **Prior-run H carryover** — an archived prior run marked the item `H`
+   and current-run information still supports the designation. Do not
+   silently demote a prior `H` without explaining why in the digest.
+
+Auto-promoted items are still subject to the calibration check below.
+Never promote more than **3** items per run this way — if more seem to
+qualify, the rubric is drifting; recheck before pushing.
 
 ## Calibration check (run at P4 end)
 
